@@ -47,6 +47,8 @@ skills/docmost-mcp/SKILL.md
 
 Этот JSON не нужно вставлять в терминал. Его вставляют в настройки MCP-клиента.
 
+Важно: назовите MCP server именно `docmost`. Skill ниже ожидает такое имя сервера.
+
 ### Cursor
 
 В проекте создайте файл:
@@ -81,13 +83,27 @@ skills/docmost-mcp/SKILL.md
 Settings -> Developer -> Edit Config
 ```
 
-Вставьте такой же блок в файл конфигурации Claude Desktop.
+В файл конфигурации вставьте блок `docmost` внутрь `mcpServers`:
+
+```json
+{
+  "mcpServers": {
+    "docmost": {
+      "type": "http",
+      "url": "https://docmost.offercore.ru/mcp",
+      "headers": {
+        "Authorization": "Bearer dcmcp_YOUR_TOKEN"
+      }
+    }
+  }
+}
+```
 
 Если в файле уже есть `mcpServers`, добавьте внутрь него только блок `"docmost": { ... }`, а не второй `mcpServers`.
 
 ### Codex
 
-В Codex этот JSON обычно не вставляют. Добавьте MCP server через настройки Codex или через CLI/конфиг, если вы настраиваете Codex локально.
+В Codex добавьте MCP server через настройки приложения или локальный конфиг MCP. Не вставляйте JSON в обычный чат с агентом.
 
 Нужные значения:
 
@@ -97,6 +113,8 @@ URL: https://docmost.offercore.ru/mcp
 Transport: Streamable HTTP
 Header: Authorization: Bearer dcmcp_YOUR_TOKEN
 ```
+
+Если Codex просит JSON-конфиг, используйте тот же блок, что в разделе Cursor.
 
 ### Другой MCP-клиент
 
@@ -126,6 +144,24 @@ skills/docmost-mcp
 
 После этого перезапустите агента или обновите MCP servers.
 
+## Шаг 5. Проверьте подключение
+
+После настройки откройте агента и попросите его проверить Docmost MCP:
+
+```text
+Проверь, что MCP server `docmost` доступен. Вызови `list_spaces` или найди страницу по запросу `трудоустройство`.
+```
+
+Успешный результат: агент видит инструменты Docmost MCP и может вызвать `list_spaces`, `search_pages` или `get_page`.
+
+Если агент не видит инструменты:
+
+- проверьте, что server называется `docmost`;
+- проверьте URL `https://docmost.offercore.ru/mcp`;
+- проверьте заголовок `Authorization: Bearer dcmcp_YOUR_TOKEN`;
+- перезапустите MCP-клиент или обновите список MCP servers;
+- если ошибка `401`, создайте новый MCP-токен в Docmost и замените старый.
+
 ## Как пользоваться
 
 Спросите агента обычным текстом:
@@ -135,6 +171,13 @@ skills/docmost-mcp
 ```
 
 Агент должен сам вызвать `search_pages`, затем `get_page`, и дать ответ со ссылками на статьи Docmost.
+
+Пример хорошего ответа заканчивается так:
+
+```text
+Sources:
+- https://docmost.offercore.ru/s/.../p/...
+```
 
 ## Если хотите, чтобы агент настроил все сам
 
@@ -159,3 +202,5 @@ Header: Authorization: Bearer dcmcp_MY_TOKEN
 ## Важно
 
 Docmost MCP только читает данные. Агент не сможет создавать, редактировать или удалять страницы.
+
+Не публикуйте настоящий `dcmcp_...` токен в GitHub, README, скриншотах, логах или чатах. Если токен случайно попал в публичное место, удалите его в Docmost и создайте новый.

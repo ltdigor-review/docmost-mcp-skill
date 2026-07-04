@@ -11,6 +11,8 @@ Use this skill when a user asks a question that should be answered from Docmost 
 
 Docmost MCP must already be configured in the local MCP client.
 
+If setup is the current task, configure the MCP server first, then verify it before answering that setup is complete.
+
 Expected server:
 
 ```text
@@ -37,6 +39,8 @@ dcmcp_...
 
 Do not ask the user for the token unless setup or authentication is the current task. Never print a full token in chat, logs, docs, or examples.
 
+If the server is configured under a different name, either use that available server name if the client exposes it clearly, or tell the user to rename it to `docmost` for this skill.
+
 ## Tool scope
 
 Docmost MCP is read-only.
@@ -51,6 +55,8 @@ Allowed tools:
 
 Do not expect write, delete, admin, database, cookie, or browser-session access through MCP.
 
+If the user asks to create, edit, delete, publish, invite users, change permissions, or perform admin work, explain that this MCP server cannot do that and ask for an appropriate write/admin workflow instead.
+
 ## Default workflow
 
 1. Search with `search_pages` using the user's question.
@@ -61,6 +67,8 @@ Do not expect write, delete, admin, database, cookie, or browser-session access 
 6. Cite sources with `sourceUrl` links at the end.
 
 If the answer needs one exact article and search returns a clear match, reading one page is enough.
+
+For setup verification, use `list_spaces` or a small `search_pages` query such as `трудоустройство`. Do not read unrelated pages just to prove the connection works.
 
 ## Source handling
 
@@ -95,6 +103,10 @@ Slow down. Retry only if the client workflow allows it. If rate limiting continu
 ### No relevant pages
 
 Try one narrower search and one broader search. If both fail, answer that Docmost did not return a relevant source and state the searches you tried.
+
+### MCP tools not visible
+
+Tell the user the MCP client has not loaded the `docmost` server. Ask them to check the server name, endpoint, transport, authorization header, and then restart or refresh the MCP client.
 
 ## Output format
 
