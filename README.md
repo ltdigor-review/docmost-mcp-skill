@@ -1,34 +1,49 @@
-# Docmost MCP: подключение AI-агента к базе знаний
+# Docmost MCP skill
 
-Этот репозиторий описывает, как подключить внешний MCP-compatible AI-агент к Docmost как к read-only источнику знаний.
+Русская версия ниже. English version follows.
 
-MCP-доступ нужен для сценария: пользователь задает вопрос агенту, агент ищет релевантные статьи в Docmost, читает их как чистый Markdown/текст, возвращает ответ и прикладывает ссылки на источники.
+## Русская версия
 
-## Что умеет Docmost MCP
+### Что это
 
-Docmost MCP дает агенту только чтение:
+Этот репозиторий содержит agent skill для работы с Docmost через MCP и короткую инструкцию по подключению.
 
-- искать страницы: `search_pages`
-- открыть страницу: `get_page`
-- посмотреть доступные пространства: `list_spaces`
-- посмотреть дочерние страницы: `list_child_pages`
-- проверить текущий workspace/user/token scope: `get_mcp_context`
+Это не реализация Docmost MCP server. MCP endpoint уже должен существовать на стороне Docmost.
 
-Записи, удаления, изменения страниц и админские операции через MCP недоступны.
+Docmost в этом сценарии работает как база знаний только для чтения. Агент может искать статьи, открывать нужные страницы, отвечать пользователю и прикладывать ссылки на источники.
 
-## Безопасность
+Репозиторий состоит из двух частей:
 
-Docmost MCP не использует cookies, browser session, admin session и обычные API keys.
+- этот `README.md` с настройкой сервера, токена и MCP-клиента
+- `skills/docmost-mcp/SKILL.md` с инструкцией для агента
 
-Для подключения нужен отдельный MCP-токен формата:
+README нужен человеку, который настраивает доступ. Skill нужен агенту, чтобы он правильно пользовался Docmost после подключения.
+
+### Что умеет Docmost MCP
+
+Доступны только read-only tools:
+
+- `search_pages`: поиск страниц
+- `get_page`: чтение страницы
+- `list_spaces`: список доступных пространств
+- `list_child_pages`: дочерние страницы
+- `get_mcp_context`: текущий workspace, user и token scope
+
+Через MCP нельзя создавать, редактировать или удалять страницы. Админские действия тоже недоступны.
+
+### Безопасность
+
+Docmost MCP не использует cookies, browser session, admin session или обычные API keys.
+
+Для подключения нужен отдельный MCP-токен:
 
 ```text
 dcmcp_...
 ```
 
-Агент видит только то, что видит пользователь, который создал токен. Если у токена задан scope по пространствам, доступ дополнительно ограничивается этими пространствами.
+Агент видит только то, что видит пользователь, создавший токен. Если токен ограничен конкретными пространствами, агент видит только эти пространства.
 
-MCP не отдает:
+MCP не возвращает:
 
 - raw ProseMirror JSON
 - raw DB fields
@@ -38,15 +53,15 @@ MCP не отдает:
 - internal config
 - write tools
 
-## Как администратору включить MCP
+### Включить MCP на сервере
 
-На сервере должен быть включен глобальный флаг:
+На сервере Docmost включите глобальный флаг:
 
 ```env
 MCP_SERVER_ENABLED=true
 ```
 
-Дополнительные настройки:
+Дополнительные лимиты:
 
 ```env
 MCP_RATE_LIMIT_PER_MINUTE=60
@@ -54,33 +69,40 @@ MCP_MAX_SEARCH_RESULTS=10
 MCP_MAX_PAGE_CHARS=80000
 ```
 
-После этого администратор включает MCP в интерфейсе Docmost:
+Затем включите MCP в workspace:
 
 ```text
 Settings -> AI settings -> MCP -> Enable
 ```
 
-Если `MCP_SERVER_ENABLED=false`, workspace-тумблер в интерфейсе не даст создать рабочие MCP-токены.
+Если `MCP_SERVER_ENABLED=false`, workspace-тумблер не создаст рабочие MCP-токены.
 
-## Как пользователю получить MCP-токен
+### Создать MCP-токен
 
-1. Откройте Docmost.
-2. Перейдите в `Account -> API keys`.
-3. Найдите блок `MCP tokens`.
-4. Нажмите `Create MCP token`.
-5. Укажите имя токена, например `Cursor`, `Claude`, `Job agent`.
-6. При необходимости ограничьте токен конкретными пространствами.
-7. Выберите срок действия.
-8. Скопируйте токен сразу после создания.
+В Docmost:
 
-Токен показывается только один раз. Если вы его потеряли, создайте новый и отзовите старый.
+1. Откройте `Account -> API keys`.
+2. Найдите `MCP tokens`.
+3. Нажмите `Create MCP token`.
+4. Укажите имя, например `Cursor`, `Claude`, `Codex` или `Job agent`.
+5. При необходимости ограничьте токен конкретными пространствами.
+6. Выберите срок действия.
+7. Скопируйте токен сразу после создания.
 
-## Параметры подключения
+Токен показывается один раз. Если вы его потеряли, создайте новый и отзовите старый.
+
+### Подключить MCP-клиент
 
 Endpoint:
 
 ```text
 https://YOUR_DOCMOST_DOMAIN/mcp
+```
+
+Endpoint для OfferCore Docmost:
+
+```text
+https://docmost.offercore.ru/mcp
 ```
 
 Transport:
@@ -92,18 +114,10 @@ Streamable HTTP
 Header:
 
 ```text
-Authorization: Bearer dcmcp_...
+Authorization: Bearer dcmcp_YOUR_TOKEN
 ```
 
-Для OfferCore Docmost endpoint:
-
-```text
-https://docmost.offercore.ru/mcp
-```
-
-## Пример generic MCP client config
-
-Формат у разных клиентов отличается, но смысл один: указать URL MCP endpoint и bearer token.
+Пример generic MCP config:
 
 ```json
 {
@@ -119,23 +133,79 @@ https://docmost.offercore.ru/mcp
 }
 ```
 
-Если клиент отдельно спрашивает transport, выбирайте:
+Если клиент отдельно спрашивает transport, выбирайте `Streamable HTTP`.
 
-```text
-Streamable HTTP
+### Cursor
+
+Добавьте новый MCP server в настройках Cursor:
+
+```json
+{
+  "mcpServers": {
+    "docmost": {
+      "type": "http",
+      "url": "https://docmost.offercore.ru/mcp",
+      "headers": {
+        "Authorization": "Bearer dcmcp_YOUR_TOKEN"
+      }
+    }
+  }
+}
 ```
 
-## Как агент должен использовать Docmost
+После сохранения перезапустите Cursor или перезагрузите MCP servers.
+
+### Claude Desktop
+
+Откройте MCP config Claude Desktop и добавьте:
+
+```json
+{
+  "mcpServers": {
+    "docmost": {
+      "type": "http",
+      "url": "https://docmost.offercore.ru/mcp",
+      "headers": {
+        "Authorization": "Bearer dcmcp_YOUR_TOKEN"
+      }
+    }
+  }
+}
+```
+
+После сохранения перезапустите Claude Desktop.
+
+### Codex
+
+Добавьте Docmost MCP server в MCP config Codex:
+
+```text
+Name: docmost
+Type: http
+URL: https://docmost.offercore.ru/mcp
+Transport: Streamable HTTP
+Header: Authorization: Bearer dcmcp_YOUR_TOKEN
+```
+
+Затем установите или скопируйте skill:
+
+```text
+skills/docmost-mcp/SKILL.md
+```
+
+MCP config дает агенту tools. Skill объясняет, когда искать, какие страницы читать и как цитировать источники.
+
+### Как агент должен работать
 
 Рекомендуемый порядок:
 
-1. Вызвать `search_pages` с вопросом пользователя.
-2. Выбрать 2-5 наиболее релевантных страниц.
+1. Вызвать `search_pages` по вопросу пользователя.
+2. Выбрать 2-5 подходящих страниц.
 3. Открыть их через `get_page`.
-4. Ответить пользователю на своей стороне.
-5. В конце ответа дать ссылки на источники из `sourceUrl`.
+4. Ответить только по найденному материалу.
+5. В конце добавить ссылки из `sourceUrl`.
 
-Пример поведения:
+Пример:
 
 ```text
 Пользователь: Как подготовиться к трудоустройству?
@@ -149,11 +219,11 @@ Streamable HTTP
    - https://docmost.offercore.ru/s/hr/p/...
 ```
 
-## Что возвращает `get_page`
+### Что возвращает `get_page`
 
-Страница возвращается в читаемом виде для модели:
+`get_page` возвращает страницу в виде, удобном для модели:
 
-- заголовки сохраняются как Markdown headings
+- заголовки остаются Markdown headings
 - списки остаются списками
 - таблицы остаются читаемыми таблицами
 - ссылки остаются ссылками
@@ -173,20 +243,31 @@ Streamable HTTP
 Source: https://docmost.offercore.ru/s/hr/p/example
 ```
 
-## Частые ошибки
+### Проверка
 
-### 401 Unauthorized
+- На сервере включен `MCP_SERVER_ENABLED=true`.
+- MCP включен в workspace UI.
+- Пользователь создал `dcmcp_...` токен.
+- Клиент подключается к `https://YOUR_DOCMOST_DOMAIN/mcp`.
+- Header содержит `Authorization: Bearer <token>`.
+- `list_tools` показывает только read-only tools.
+- `search_pages` возвращает релевантные страницы.
+- `get_page` возвращает Markdown и `sourceUrl`.
 
-Причины:
+### Частые ошибки
+
+#### 401 Unauthorized
+
+Проверьте:
 
 - токен не передан
 - передан обычный API key вместо MCP-токена
 - токен скопирован не полностью
 - токен отозван или истек
 
-### 403 Forbidden
+#### 403 Forbidden
 
-Причины:
+Проверьте:
 
 - MCP выключен на сервере
 - MCP выключен в workspace
@@ -194,11 +275,11 @@ Source: https://docmost.offercore.ru/s/hr/p/example
 - страница недоступна пользователю
 - страница вне space scope токена
 
-### 429 Too Many Requests
+#### 429 Too Many Requests
 
 Агент превысил rate limit. Уменьшите частоту запросов или настройте лимит на сервере.
 
-### Агент не находит статью
+#### Агент не находит статью
 
 Попробуйте:
 
@@ -207,7 +288,7 @@ Source: https://docmost.offercore.ru/s/hr/p/example
 - ограничить поиск нужным `spaceId`
 - проверить, что пользователь сам видит эту статью в Docmost
 
-## Как отозвать токен
+### Отозвать токен
 
 Пользователь может отозвать свой токен:
 
@@ -215,16 +296,300 @@ Source: https://docmost.offercore.ru/s/hr/p/example
 Account -> API keys -> MCP tokens -> Revoke
 ```
 
-Администратор может управлять MCP-доступом в workspace settings.
+Администратор управляет MCP-доступом в workspace settings.
 
-## Минимальный чеклист проверки
+## English version
 
-- MCP включен через `MCP_SERVER_ENABLED=true`.
-- MCP включен в workspace UI.
-- Пользователь создал `dcmcp_...` токен.
-- Клиент подключается к `https://YOUR_DOCMOST_DOMAIN/mcp`.
-- Header содержит `Authorization: Bearer <token>`.
-- `list_tools` показывает только read-only tools.
-- `search_pages` возвращает релевантные страницы.
-- `get_page` возвращает чистый Markdown и `sourceUrl`.
+### What this is
 
+This repository provides an agent skill for using Docmost through MCP, plus a short setup guide.
+
+It does not implement a Docmost MCP server. The MCP endpoint must already exist on the Docmost side.
+
+In this setup, Docmost is a read-only knowledge base. The agent can search pages, open the relevant ones, answer the user, and cite the Docmost sources it used.
+
+The repository has two parts:
+
+- this `README.md`, with server, token, and MCP client setup
+- `skills/docmost-mcp/SKILL.md`, with agent instructions
+
+The README is for the person setting up access. The skill is for the agent that will use Docmost after MCP is connected.
+
+### What Docmost MCP can do
+
+Docmost MCP exposes read-only tools:
+
+- `search_pages`: search pages
+- `get_page`: read a page
+- `list_spaces`: list accessible spaces
+- `list_child_pages`: list child pages
+- `get_mcp_context`: inspect workspace, user, and token scope
+
+MCP cannot create, edit, or delete pages. It cannot perform admin actions.
+
+### Security
+
+Docmost MCP does not use cookies, browser sessions, admin sessions, or regular API keys.
+
+The user connects with a dedicated MCP token:
+
+```text
+dcmcp_...
+```
+
+The agent gets the same access as the user who created the token. If the token is scoped to specific spaces, the agent can only see those spaces.
+
+MCP does not return:
+
+- raw ProseMirror JSON
+- raw database fields
+- cookies
+- internal secrets
+- storage paths
+- internal config
+- write tools
+
+### Enable MCP on the server
+
+Enable the global flag on the Docmost server:
+
+```env
+MCP_SERVER_ENABLED=true
+```
+
+Optional limits:
+
+```env
+MCP_RATE_LIMIT_PER_MINUTE=60
+MCP_MAX_SEARCH_RESULTS=10
+MCP_MAX_PAGE_CHARS=80000
+```
+
+Then enable MCP in the workspace:
+
+```text
+Settings -> AI settings -> MCP -> Enable
+```
+
+If `MCP_SERVER_ENABLED=false`, the workspace toggle will not create working MCP tokens.
+
+### Create an MCP token
+
+In Docmost:
+
+1. Open `Account -> API keys`.
+2. Find `MCP tokens`.
+3. Click `Create MCP token`.
+4. Enter a name, such as `Cursor`, `Claude`, `Codex`, or `Job agent`.
+5. Scope the token to specific spaces if needed.
+6. Choose the expiration period.
+7. Copy the token right after creating it.
+
+The token is shown once. If you lose it, create a new one and revoke the old one.
+
+### Connect an MCP client
+
+Endpoint:
+
+```text
+https://YOUR_DOCMOST_DOMAIN/mcp
+```
+
+OfferCore Docmost endpoint:
+
+```text
+https://docmost.offercore.ru/mcp
+```
+
+Transport:
+
+```text
+Streamable HTTP
+```
+
+Header:
+
+```text
+Authorization: Bearer dcmcp_YOUR_TOKEN
+```
+
+Example generic MCP config:
+
+```json
+{
+  "mcpServers": {
+    "docmost": {
+      "type": "http",
+      "url": "https://docmost.offercore.ru/mcp",
+      "headers": {
+        "Authorization": "Bearer dcmcp_YOUR_TOKEN"
+      }
+    }
+  }
+}
+```
+
+If the client asks for transport separately, choose `Streamable HTTP`.
+
+### Cursor
+
+Add a new MCP server in Cursor settings:
+
+```json
+{
+  "mcpServers": {
+    "docmost": {
+      "type": "http",
+      "url": "https://docmost.offercore.ru/mcp",
+      "headers": {
+        "Authorization": "Bearer dcmcp_YOUR_TOKEN"
+      }
+    }
+  }
+}
+```
+
+After saving, restart Cursor or reload MCP servers.
+
+### Claude Desktop
+
+Open the Claude Desktop MCP config and add:
+
+```json
+{
+  "mcpServers": {
+    "docmost": {
+      "type": "http",
+      "url": "https://docmost.offercore.ru/mcp",
+      "headers": {
+        "Authorization": "Bearer dcmcp_YOUR_TOKEN"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Desktop after saving.
+
+### Codex
+
+Add the Docmost MCP server to the Codex MCP config:
+
+```text
+Name: docmost
+Type: http
+URL: https://docmost.offercore.ru/mcp
+Transport: Streamable HTTP
+Header: Authorization: Bearer dcmcp_YOUR_TOKEN
+```
+
+Then install or copy the skill:
+
+```text
+skills/docmost-mcp/SKILL.md
+```
+
+The MCP config gives the agent tools. The skill tells it when to search, which pages to read, and how to cite sources.
+
+### How the agent should work
+
+Recommended flow:
+
+1. Call `search_pages` with the user's question.
+2. Pick 2 to 5 relevant pages.
+3. Open them with `get_page`.
+4. Answer only from the retrieved material.
+5. Add `sourceUrl` links at the end.
+
+Example:
+
+```text
+User: How should I prepare for employment?
+
+Agent:
+1. search_pages("employment preparation interview resume")
+2. get_page("...")
+3. get_page("...")
+4. Writes the answer.
+5. Adds sources:
+   - https://docmost.offercore.ru/s/hr/p/...
+```
+
+### What `get_page` returns
+
+`get_page` returns model-friendly content:
+
+- headings stay as Markdown headings
+- lists stay as lists
+- tables stay readable
+- links stay as links
+- service ProseMirror JSON is not returned
+
+Example:
+
+```markdown
+# Interview preparation
+
+## Before the interview
+
+- update your resume
+- prepare answers to common questions
+- check your portfolio link
+
+Source: https://docmost.offercore.ru/s/hr/p/example
+```
+
+### Validation
+
+- The server has `MCP_SERVER_ENABLED=true`.
+- MCP is enabled in the workspace UI.
+- The user created a `dcmcp_...` token.
+- The client connects to `https://YOUR_DOCMOST_DOMAIN/mcp`.
+- Header contains `Authorization: Bearer <token>`.
+- `list_tools` shows only read-only tools.
+- `search_pages` returns relevant pages.
+- `get_page` returns Markdown and `sourceUrl`.
+
+### Common errors
+
+#### 401 Unauthorized
+
+Check whether:
+
+- the token was not sent
+- a regular API key was used instead of an MCP token
+- the token was copied incompletely
+- the token was revoked or expired
+
+#### 403 Forbidden
+
+Check whether:
+
+- MCP is disabled on the server
+- MCP is disabled in the workspace
+- the user is deactivated
+- the page is unavailable to the user
+- the page is outside the token space scope
+
+#### 429 Too Many Requests
+
+The agent exceeded the rate limit. Reduce request frequency or change the server limit.
+
+#### Agent cannot find a page
+
+Try this:
+
+- use a more specific query
+- call `list_spaces` first
+- limit search to the relevant `spaceId`
+- confirm that the token owner can see the page in Docmost
+
+### Revoke a token
+
+A user can revoke their own token:
+
+```text
+Account -> API keys -> MCP tokens -> Revoke
+```
+
+Admins can manage MCP access in workspace settings.
