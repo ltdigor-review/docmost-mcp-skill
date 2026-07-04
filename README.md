@@ -19,7 +19,52 @@
 - MCP-клиент: Codex, Cursor, Claude Desktop или другой клиент с поддержкой MCP;
 - этот репозиторий.
 
-## Короткая схема
+## Самый простой вариант - дайте репозиторий агенту
+
+Это приоритетный вариант. Если у вас уже есть AI-агент, который умеет работать с файлами и настройками MCP, не настраивайте все руками. Просто отправьте агенту ссылку на этот репозиторий и попросите подключить Docmost MCP.
+
+Скопируйте агенту этот текст:
+
+```text
+Настрой мне Docmost MCP по инструкции из репозитория:
+https://github.com/ltdigor-review/docmost-mcp-skill
+
+Что нужно сделать:
+
+1. Скачай репозиторий.
+2. Установи skill `skills/docmost-mcp`.
+3. Добавь MCP server с именем `docmost`.
+4. Используй URL:
+   https://docmost.offercore.ru/mcp
+5. Используй transport:
+   Streamable HTTP
+6. Добавь header:
+   Authorization: Bearer <мой MCP token>
+7. Проверь подключение через `list_spaces` или `search_pages`.
+8. После проверки скажи, какие файлы или настройки были изменены.
+
+Важно:
+- не печатай полный token в ответах, логах, git diff, README или публичных файлах;
+- если можно, сохрани token через настройки клиента, secret storage или локальный MCP config;
+- если для настройки нужен пароль, OAuth, MFA, CAPTCHA или системное разрешение, остановись и попроси меня выполнить этот шаг;
+- если мой MCP-клиент не дает тебе менять настройки автоматически, скажи мне точный ручной шаг.
+```
+
+Если у вас не OfferCore Docmost, замените URL:
+
+```text
+https://docmost.offercore.ru/mcp
+```
+
+на свой:
+
+```text
+https://YOUR_DOCMOST_DOMAIN/mcp
+```
+
+Если агент просит сам токен, вставляйте его только в доверенной локальной сессии. Безопаснее добавить token через настройки MCP-клиента или secret storage, а агенту дать только URL и имя server.
+
+## Ручной вариант
 
 1. Создать MCP token в Docmost.
 2. Добавить MCP server `docmost` в свой MCP-клиент.
@@ -284,27 +329,17 @@ Sources:
 - https://docmost.offercore.ru/s/.../p/...
 ```
 
-## Если хотите, чтобы агент настроил все сам
-
-Так можно делать только если вы доверяете локальной агент-сессии.
-
-Лучше безопасный вариант: сначала сами добавьте токен через настройки MCP-клиента или secret storage, а агенту дайте только ссылку на репозиторий и URL.
-
-Запрос агенту:
+## Короткий запрос агенту
 
 ```text
-Скачай репозиторий https://github.com/ltdigor-review/docmost-mcp-skill.
-Установи skill из `skills/docmost-mcp/SKILL.md`.
-Подключи MCP server:
-
-Name: docmost
+Скачай https://github.com/ltdigor-review/docmost-mcp-skill и настрой Docmost MCP по README.
+Server name: docmost
 URL: https://docmost.offercore.ru/mcp
 Transport: Streamable HTTP
-Header: Authorization: Bearer <мой MCP token>
-
-Не печатай полный token в логах, ответах, README, git diff или публичных файлах.
-Если можно, используй настройки клиента или secret storage вместо вставки token в файлы проекта.
+Token: я дам отдельно или добавлю через настройки клиента.
 ```
+
+Полный рекомендуемый запрос находится в начале README в разделе `Самый простой вариант - дайте репозиторий агенту`.
 
 ## Частые проблемы
 
@@ -415,4 +450,3 @@ https://YOUR_DOCMOST_DOMAIN/mcp
 - обходить ограничения доступа.
 
 Если нужна запись или админка, нужен отдельный write/admin workflow. Этот репозиторий только для read-only поиска и чтения через MCP.
-
