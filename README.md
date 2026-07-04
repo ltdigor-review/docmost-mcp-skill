@@ -34,9 +34,29 @@ https://docmost.offercore.ru/mcp
 Скопируйте текст:
 
 ```text
-Настрой мне Docmost MCP по инструкции из репозитория:
+Настрой Docmost MCP из репозитория:
 https://github.com/ltdigor-review/docmost-mcp-skill
-Токен dcmcp_YOUR_TOKEN
+
+Параметры:
+- server name: docmost
+- URL: https://docmost.offercore.ru/mcp
+- transport: streamable_http
+- auth: Bearer token
+- token: dcmcp_YOUR_TOKEN
+
+Сделай:
+1. Установи skill в ~/.codex/skills/docmost-mcp
+2. Добавь или проверь ~/.codex/config.toml:
+
+[mcp_servers.docmost]
+url = "https://docmost.offercore.ru/mcp"
+bearer_token_env_var = "DOCMOST_MCP_TOKEN"
+
+3. Сохрани токен в DOCMOST_MCP_TOKEN для Codex, не печатай его в ответе.
+4. Проверь подключение:
+   - прямым MCP initialize запросом
+   - командой codex mcp list
+5. Если текущий чат не видит инструменты MCP, скажи перезапустить Codex.
 ```
 
 ### Вариант 2. Установка в Codex руками
