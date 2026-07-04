@@ -40,7 +40,7 @@ https://github.com/ltdigor-review/docmost-mcp-skill
 Параметры:
 - server name: docmost
 - URL: https://docmost.offercore.ru/mcp
-- transport: streamable_http
+- Transport: Streamable HTTP
 - auth: Bearer token
 - token: dcmcp_YOUR_TOKEN
 
@@ -71,13 +71,38 @@ rm -rf ~/.codex/skills/docmost-mcp
 cp -R /tmp/docmost-mcp-skill/skills/docmost-mcp ~/.codex/skills/docmost-mcp
 ```
 
-Добавьте MCP server в настройках Codex:
+Добавьте MCP server в `~/.codex/config.toml`:
 
-```text
-Name: docmost
-URL: https://docmost.offercore.ru/mcp
-Transport: Streamable HTTP
-Header: Authorization: Bearer dcmcp_YOUR_TOKEN
+```toml
+[mcp_servers.docmost]
+url = "https://docmost.offercore.ru/mcp"
+bearer_token_env_var = "DOCMOST_MCP_TOKEN"
+```
+
+Сохраните токен в окружении Codex на macOS:
+
+```bash
+launchctl setenv DOCMOST_MCP_TOKEN 'dcmcp_YOUR_TOKEN'
+```
+
+Проверьте, что Codex видит сервер:
+
+```bash
+codex mcp list
+```
+
+В списке должен быть сервер `docmost` с URL `https://docmost.offercore.ru/mcp`, env var `DOCMOST_MCP_TOKEN`, статусом `enabled` и auth `Bearer token`.
+
+Можно дополнительно проверить MCP endpoint прямым initialize-запросом:
+
+```bash
+TOKEN="$(launchctl getenv DOCMOST_MCP_TOKEN)"
+curl -sS \
+  -H "Authorization: Bearer ${TOKEN}" \
+  -H "Accept: application/json, text/event-stream" \
+  -H "Content-Type: application/json" \
+  --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"docmost-mcp-check","version":"1.0"}}}' \
+  https://docmost.offercore.ru/mcp
 ```
 
 Перезапустите Codex.
