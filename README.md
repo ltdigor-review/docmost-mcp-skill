@@ -45,7 +45,17 @@ skills/docmost-mcp/SKILL.md
 
 ## Шаг 3. Подключите MCP server
 
-Добавьте в настройки MCP-клиента:
+Этот JSON не нужно вставлять в терминал. Его вставляют в настройки MCP-клиента.
+
+### Cursor
+
+В проекте создайте файл:
+
+```text
+.cursor/mcp.json
+```
+
+Вставьте туда:
 
 ```json
 {
@@ -61,12 +71,43 @@ skills/docmost-mcp/SKILL.md
 }
 ```
 
-Замените `dcmcp_YOUR_TOKEN` на токен из Docmost.
+Замените `dcmcp_YOUR_TOKEN` на токен из Docmost. После этого перезапустите Cursor или обновите MCP servers.
 
-Transport:
+### Claude Desktop
+
+Откройте настройки Claude Desktop:
 
 ```text
-Streamable HTTP
+Settings -> Developer -> Edit Config
+```
+
+Вставьте такой же блок в файл конфигурации Claude Desktop.
+
+Если в файле уже есть `mcpServers`, добавьте внутрь него только блок `"docmost": { ... }`, а не второй `mcpServers`.
+
+### Codex
+
+В Codex этот JSON обычно не вставляют. Добавьте MCP server через настройки Codex или через CLI/конфиг, если вы настраиваете Codex локально.
+
+Нужные значения:
+
+```text
+Name: docmost
+URL: https://docmost.offercore.ru/mcp
+Transport: Streamable HTTP
+Header: Authorization: Bearer dcmcp_YOUR_TOKEN
+```
+
+### Другой MCP-клиент
+
+Ищите настройку с названием `MCP servers`, `mcp.json`, `Connectors` или `Tools`.
+
+Нужные значения те же:
+
+```text
+URL: https://docmost.offercore.ru/mcp
+Transport: Streamable HTTP
+Header: Authorization: Bearer dcmcp_YOUR_TOKEN
 ```
 
 ## Шаг 4. Подключите skill к агенту
@@ -118,4 +159,3 @@ Header: Authorization: Bearer dcmcp_MY_TOKEN
 ## Важно
 
 Docmost MCP только читает данные. Агент не сможет создавать, редактировать или удалять страницы.
-
