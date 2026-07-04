@@ -2,11 +2,11 @@
 
 ## Описание
 
-Skill для AI-агента, который читает Docmost через MCP: ищет страницы, открывает нужные материалы и отвечает со ссылками на источники.
+Этот skill помогает AI-агенту читать Docmost через MCP: искать страницы, открывать нужные материалы и отвечать со ссылками на источники.
 
 Это не MCP-сервер и не плагин Docmost. Сам Docmost MCP уже должен быть доступен в вашем Docmost.
 
-## Что нужно
+## Перед началом
 
 - аккаунт в Docmost;
 - MCP token вида `dcmcp_...`;
@@ -33,7 +33,7 @@ https://YOUR_DOCMOST_DOMAIN/mcp
 
 ### Вариант 1. Установка агентом
 
-Это основной вариант. Отправьте агенту ссылку на репозиторий и попросите все настроить.
+Это основной вариант. Отправьте агенту ссылку на репозиторий и попросите настроить все самому.
 
 Скопируйте текст:
 
@@ -41,7 +41,7 @@ https://YOUR_DOCMOST_DOMAIN/mcp
 Настрой мне Docmost MCP по инструкции из репозитория:
 https://github.com/ltdigor-review/docmost-mcp-skill
 
-Что нужно сделать:
+Сделай так:
 1. Скачай репозиторий.
 2. Установи skill `skills/docmost-mcp`.
 3. Добавь MCP server с именем `docmost`.
@@ -49,11 +49,11 @@ https://github.com/ltdigor-review/docmost-mcp-skill
 5. Используй transport `Streamable HTTP`.
 6. Добавь header `Authorization: Bearer <мой MCP token>`.
 7. Проверь подключение через `list_spaces` или `search_pages`.
-8. Скажи, что изменил и где.
+8. Напиши, что изменил и где.
 
 Не печатай полный token в ответах, логах, git diff или публичных файлах.
 Если нужен пароль, OAuth, MFA, CAPTCHA или системное разрешение, остановись и попроси меня выполнить этот шаг.
-Если не можешь изменить настройки MCP сам, дай мне точную ручную инструкцию.
+Если не можешь изменить настройки MCP сам, дай точную ручную инструкцию.
 ```
 
 ### Вариант 2. Установка в Codex руками
@@ -62,6 +62,7 @@ https://github.com/ltdigor-review/docmost-mcp-skill
 
 ```bash
 mkdir -p ~/.codex/skills
+rm -rf /tmp/docmost-mcp-skill
 git clone https://github.com/ltdigor-review/docmost-mcp-skill.git /tmp/docmost-mcp-skill
 rm -rf ~/.codex/skills/docmost-mcp
 cp -R /tmp/docmost-mcp-skill/skills/docmost-mcp ~/.codex/skills/docmost-mcp
@@ -92,4 +93,4 @@ Header: Authorization: Bearer dcmcp_YOUR_TOKEN
 Как подготовиться к трудоустройству?
 ```
 
-Агент должен найти подходящие страницы в Docmost, прочитать их и ответить со ссылками на источники.
+Агент найдет подходящие страницы в Docmost, прочитает их и ответит со ссылками на источники.
