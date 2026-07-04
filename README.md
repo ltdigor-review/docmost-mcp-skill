@@ -122,3 +122,7 @@ curl -sS \
 ```
 
 Агент найдет подходящие страницы в Docmost, прочитает их и даст ответ со ссылками на источники.
+
+Пример:
+<img width="399" height="163" alt="image" src="https://github.com/user-attachments/assets/85f3477b-41a0-4fc2-ba73-b9f86aa53ae7" />
+
