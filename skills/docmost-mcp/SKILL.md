@@ -19,11 +19,13 @@ Expected server:
 docmost
 ```
 
-Expected endpoint:
+Expected endpoint for OfferCore:
 
 ```text
 https://docmost.offercore.ru/mcp
 ```
+
+For another Docmost instance, use that instance's `/mcp` endpoint.
 
 Expected transport:
 
@@ -37,7 +39,7 @@ Expected token format:
 dcmcp_...
 ```
 
-Do not ask the user for the token unless setup or authentication is the current task. Never print a full token in chat, logs, docs, or examples.
+Do not ask the user for the token unless setup or authentication is the current task. Prefer client settings, secret storage, or local MCP config over pasting tokens into chat. Never print a full token in chat, logs, docs, diffs, or examples.
 
 If the server is configured under a different name, either use that available server name if the client exposes it clearly, or tell the user to rename it to `docmost` for this skill.
 
@@ -56,6 +58,8 @@ Allowed tools:
 Do not expect write, delete, admin, database, cookie, or browser-session access through MCP.
 
 If the user asks to create, edit, delete, publish, invite users, change permissions, or perform admin work, explain that this MCP server cannot do that and ask for an appropriate write/admin workflow instead.
+
+Do not fall back to browser sessions, cookies, direct database access, write APIs, admin panels, or local exports unless the user explicitly asks for that separate workflow.
 
 ## Default workflow
 
