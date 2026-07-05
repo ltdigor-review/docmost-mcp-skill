@@ -25,6 +25,10 @@ URL MCP:
 https://docmost.offercore.ru/mcp
 ```
 
+## Как получить токен
+
+Перейдите по ссылке https://docmost.offercore.ru/settings/ai/mcp и созжайте свой личный токен
+
 ## Установка
 
 ### Вариант 1. Установка агентом
